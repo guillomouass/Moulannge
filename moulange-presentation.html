@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOULANGE — Solutions Photovoltaïques B2B</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --green: #1B5E20;
+    --green-mid: #2E7D32;
+    --green-light: #4CAF50;
+    --green-pale: #E8F5E9;
+    --gold: #F9A825;
+    --gold-dark: #E65100;
+    --gold-pale: #FFFDE7;
+    --white: #FFFFFF;
+    --gray: #455A64;
+    --gray-light: #ECEFF1;
+    --text: #1A1A2E;
+    --red: #C62828;
+    --blue: #1565C0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0A0F0A; color: #fff; overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,15,10,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(76,175,80,0.2);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+  }
+  .nav-logo { font-size: 1.2rem; font-weight: 700; color: #4CAF50; letter-spacing: 2px; }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; }
+  .nav-links a:hover { color: #4CAF50; }
+
+  /* ── SECTIONS ── */
+  section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 80px 2rem 2rem; position: relative; overflow: hidden; }
+
+  /* ── HERO ── */
+  #hero {
+    background: radial-gradient(ellipse at 50% 60%, rgba(46,125,50,0.25) 0%, transparent 70%), #0A0F0A;
+    flex-direction: column; text-align: center;
+  }
+  .hero-badge {
+    display: inline-block; background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.4);
+    color: #4CAF50; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 20px; margin-bottom: 2rem;
+    animation: fadeDown 0.8s ease both;
+  }
+  .hero-title {
+    font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, #4CAF50 50%, #F9A825 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: fadeUp 0.9s ease 0.1s both;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 3vw, 1.4rem); color: rgba(255,255,255,0.6);
+    margin: 1rem 0 2rem; animation: fadeUp 0.9s ease 0.2s both;
+  }
+  .hero-founders {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.9s ease 0.3s both;
+  }
+  .founder-chip {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px; padding: 8px 20px; font-size: 0.9rem; color: rgba(255,255,255,0.8);
+  }
+  .founder-chip span { color: #4CAF50; font-weight: 600; }
+  .hero-scroll { margin-top: 3rem; animation: bounce 2s infinite; color: rgba(255,255,255,0.3); font-size: 0.8rem; letter-spacing: 2px; }
+
+  /* ── MARCHÉ ── */
+  #marche { background: #0D130D; flex-direction: column; gap: 3rem; }
+  .section-label { font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; color: #4CAF50; margin-bottom: 0.5rem; }
+  .section-title { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 700; color: #fff; }
+  .section-sub { color: rgba(255,255,255,0.5); font-size: 1rem; margin-top: 0.5rem; max-width: 600px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; width: 100%; max-width: 900px; }
+  .kpi-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 16px; padding: 1.5rem; text-align: center; transition: transform 0.3s, border-color 0.3s;
+    opacity: 0; transform: translateY(30px);
+  }
+  .kpi-card.visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .kpi-card:hover { transform: translateY(-4px); border-color: rgba(76,175,80,0.5); }
+  .kpi-num { font-size: 2.5rem; font-weight: 800; color: #4CAF50; display: block; }
+  .kpi-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+  .kpi-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: 100%; max-width: 900px; }
+  .chart-box {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 1.5rem;
+  }
+  .chart-box h3 { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+  @media(max-width:600px){ .charts-row { grid-template-columns: 1fr; } }
+
+  /* ── CLIENTS ── */
+  #clients { background: #0A0F0A; flex-direction: column; gap: 3rem; }
+  .clients-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; width: 100%; max-width: 800px; }
+  .client-card {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 1.5rem; display: flex; gap: 1rem; align-items: flex-start;
+    transition: all 0.3s; opacity: 0; transform: scale(0.95);
+  }
+  .client-card.visible { opacity: 1; transform: scale(1); }
+  .client-card:hover { background: rgba(76,175,80,0.08); border-color: rgba(76,175,80,0.3); }
+  .client-icon { font-size: 2rem; flex-shrink: 0; }
+  .client-info h3 { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem; }
+  .client-info p { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+  .conso-bar { width: 100%; max-width: 800px; }
+  .conso-bar-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 0.5rem; }
+  .bar-track { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 5px; width: 0; transition: width 1.5s cubic-bezier(0.4,0,0.2,1); }
+  @media(max-width:600px){ .clients-grid { grid-template-columns: 1fr; } }
+
+  /* ── SMART ── */
+  #smart { background: #0D130D; flex-direction: column; gap: 3rem; }
+  .smart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; width: 100%; max-width: 900px; }
+  .smart-card {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px; padding: 2rem; position: relative; overflow: hidden;
+    opacity: 0; transform: translateX(-20px);
+  }
+  .smart-card.visible { opacity: 1; transform: translateX(0); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .smart-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .smart-card.green::before { background: linear-gradient(90deg, #4CAF50, #81C784); }
+  .smart-card.gold::before { background: linear-gradient(90deg, #F9A825, #FFD54F); }
+  .smart-card.blue::before { background: linear-gradient(90deg, #1565C0, #42A5F5); }
+  .smart-card.teal::before { background: linear-gradient(90deg, #00695C, #4DB6AC); }
+  .smart-big { font-size: 3rem; font-weight: 800; line-height: 1; }
+  .smart-big.green { color: #4CAF50; }
+  .smart-big.gold { color: #F9A825; }
+  .smart-big.blue { color: #42A5F5; }
+  .smart-big.teal { color: #4DB6AC; }
+  .smart-desc { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; line-height: 1.5; }
+  .smart-title { font-size: 1rem; font-weight: 600; color: #fff; margin: 0.3rem 0; }
+  @media(max-width:600px){ .smart-grid { grid-template-columns: 1fr; } }
+
+  /* ── RISQUES ── */
+  #risques { background: #0A0F0A; flex-direction: column; gap: 3rem; }
+  .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; max-width: 900px; }
+  .risk-item {
+    display: flex; gap: 1rem; align-items: flex-start; padding: 1rem;
+    background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s; opacity: 0; transform: translateY(20px);
+  }
+  .risk-item.visible { opacity: 1; transform: translateY(0); }
+  .risk-item:hover { background: rgba(255,255,255,0.06); }
+  .risk-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .risk-dot.red { background: #EF5350; box-shadow: 0 0 8px #EF535066; }
+  .risk-dot.orange { background: #FFA726; box-shadow: 0 0 8px #FFA72666; }
+  .risk-dot.yellow { background: #FFCA28; }
+  .risk-dot.green { background: #66BB6A; }
+  .risk-text h4 { font-size: 0.9rem; font-weight: 600; color: #fff; }
+  .risk-text p { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 0.2rem; line-height: 1.4; }
+  .risk-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .risk-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+  @media(max-width:600px){ .risk-grid { grid-template-columns: 1fr; } }
+
+  /* ── RESSOURCES ── */
+  #ressources { background: #0D130D; flex-direction: column; gap: 3rem; }
+  .res-tabs { display: flex; gap: 0.5rem; }
+  .res-tab {
+    padding: 8px 20px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);
+    transition: all 0.2s; background: transparent;
+  }
+  .res-tab.active { background: rgba(76,175,80,0.2); border-color: rgba(76,175,80,0.5); color: #4CAF50; }
+  .res-panel { display: none; width: 100%; max-width: 900px; animation: fadeUp 0.4s ease; }
+  .res-panel.active { display: block; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+  .team-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .avatar.g1 { background: rgba(76,175,80,0.3); color: #4CAF50; border: 1px solid rgba(76,175,80,0.4); }
+  .avatar.g2 { background: rgba(249,168,37,0.3); color: #F9A825; border: 1px solid rgba(249,168,37,0.4); }
+  .avatar.g3 { background: rgba(66,165,245,0.3); color: #42A5F5; border: 1px solid rgba(66,165,245,0.4); }
+  .team-info h4 { font-size: 0.95rem; font-weight: 600; color: #fff; }
+  .team-info p { font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 0.2rem; }
+  .team-info .salary { font-size: 0.85rem; color: #4CAF50; margin-top: 0.4rem; font-weight: 600; }
+  .fin-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .fin-card { background: rgba(255,255,255,0.04); border-radius: 14px; padding: 1.25rem; text-align: center; border: 1px solid rgba(255,255,255,0.08); }
+  .fin-card .num { font-size: 2rem; font-weight: 800; }
+  .fin-card .num.g { color: #4CAF50; }
+  .fin-card .num.b { color: #42A5F5; }
+  .fin-card .num.o { color: #F9A825; }
+  .fin-card p { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 0.3rem; }
+  .mat-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .mat-col h3 { font-size: 0.85rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+  .mat-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem; border-radius: 10px; background: rgba(255,255,255,0.03); margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .mat-item .icon { font-size: 1.1rem; }
+  @media(max-width:600px){ .fin-cards { grid-template-columns: 1fr; } .mat-cols { grid-template-columns: 1fr; } }
+
+  /* ── PLANNING ── */
+  #planning { background: #0A0F0A; flex-direction: column; gap: 3rem; }
+  .gantt { width: 100%; max-width: 950px; overflow-x: auto; }
+  .gantt-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 700px; }
+  .gantt-table th { padding: 10px 8px; background: rgba(76,175,80,0.15); color: #4CAF50; text-align: center; border: 1px solid rgba(255,255,255,0.06); font-weight: 600; font-size: 0.78rem; }
+  .gantt-table th.activity { text-align: left; min-width: 180px; }
+  .gantt-table td { padding: 8px; border: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); vertical-align: middle; }
+  .gantt-table td.activity { font-size: 0.82rem; }
+  .gantt-cell { width: 28px; height: 24px; border-radius: 4px; margin: 0 auto; }
+  .gantt-cell.active { background: linear-gradient(135deg, #4CAF50, #81C784); box-shadow: 0 0 8px rgba(76,175,80,0.4); }
+  .gantt-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .budget-num { color: #F9A825; font-weight: 600; text-align: right; }
+
+  /* ── CHIFFRAGE ── */
+  #chiffrage { background: #0D130D; flex-direction: column; gap: 3rem; }
+  .budget-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; width: 100%; max-width: 950px; }
+  .budget-list { list-style: none; }
+  .budget-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; }
+  .budget-list li:last-child { border-bottom: none; font-weight: 700; color: #4CAF50; font-size: 1rem; }
+  .budget-list li span:first-child { color: rgba(255,255,255,0.7); }
+  .budget-list li span:last-child { color: #fff; }
+  .budget-list li:last-child span { color: #4CAF50; }
+  @media(max-width:600px){ .budget-grid { grid-template-columns: 1fr; } }
+
+  /* ── CONCLUSION ── */
+  #conclusion {
+    background: radial-gradient(ellipse at 50% 50%, rgba(46,125,50,0.2) 0%, transparent 60%), #0A0F0A;
+    flex-direction: column; text-align: center; gap: 3rem;
+  }
+  .conclusion-title { font-size: clamp(2rem, 6vw, 4rem); font-weight: 800; background: linear-gradient(135deg, #4CAF50, #F9A825); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .pillars { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; width: 100%; max-width: 700px; }
+  .pillar { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; text-align: left; }
+  .pillar-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+  .pillar h3 { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; }
+  .pillar p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+  .tagline { font-size: 1.2rem; color: rgba(255,255,255,0.7); font-style: italic; }
+  .tagline em { color: #4CAF50; font-style: normal; font-weight: 600; }
+  @media(max-width:600px){ .pillars { grid-template-columns: 1fr; } }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── SOLAR ANIMATION ── */
+  .solar-bg {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 600px; height: 600px; pointer-events: none; opacity: 0.06;
+  }
+  .solar-ring {
+    position: absolute; top: 50%; left: 50%; border-radius: 50%;
+    border: 1px solid #4CAF50; transform: translate(-50%,-50%);
+    animation: spin linear infinite;
+  }
+
+  /* ── REGLEMENTAIRE ── */
+  #reglementaire { background: #0D130D; flex-direction: column; gap: 3rem; }
+  .rgl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 1rem; width: 100%; max-width: 900px; }
+  .rgl-card {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 1.25rem; opacity: 0; transform: translateY(20px);
+    transition: all 0.3s;
+  }
+  .rgl-card.visible { opacity: 1; transform: translateY(0); }
+  .rgl-card:hover { background: rgba(76,175,80,0.07); border-color: rgba(76,175,80,0.25); }
+  .rgl-card .tag { display: inline-block; background: rgba(76,175,80,0.15); color: #4CAF50; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 10px; margin-bottom: 0.7rem; }
+  .rgl-card h3 { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; }
+  .rgl-card p { font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+  .rgl-card .benefit { font-size: 0.9rem; color: #F9A825; font-weight: 600; margin-top: 0.5rem; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0A0F0A; }
+  ::-webkit-scrollbar-thumb { background: rgba(76,175,80,0.3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">☀ MOULANGE</div>
+  <div class="nav-links">
+    <a href="#marche">Marché</a>
+    <a href="#smart">Objectifs</a>
+    <a href="#risques">Risques</a>
+    <a href="#ressources">Ressources</a>
+    <a href="#planning">Planning</a>
+    <a href="#conclusion">Conclusion</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="solar-bg">
+    <div class="solar-ring" style="width:200px;height:200px;animation-duration:20s;"></div>
+    <div class="solar-ring" style="width:350px;height:350px;animation-duration:35s;animation-direction:reverse;"></div>
+    <div class="solar-ring" style="width:500px;height:500px;animation-duration:50s;"></div>
+  </div>
+  <div class="hero-badge">Projet École d'Ingénieur — ISTY Paris-Saclay</div>
+  <div class="hero-title">MOULANGE</div>
+  <div class="hero-sub">Solutions Photovoltaïques B2B · Transition Énergétique</div>
+  <div class="hero-founders">
+    <div class="founder-chip"><span>G. MOUASSAMI</span> · Co-dirigeant</div>
+    <div class="founder-chip"><span>G. LANGERON</span> · Co-dirigeante</div>
+  </div>
+  <div class="hero-scroll">↓ SCROLL</div>
+</section>
+
+<!-- ══ MARCHÉ ══ -->
+<section id="marche">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:900px;">
+    <div class="section-label">01 — Analyse de marché</div>
+    <div class="section-title">Un marché en pleine explosion</div>
+    <div class="section-sub" style="margin:0 auto 2.5rem;">La France accélère massivement sa transition vers l'énergie solaire, portée par les obligations réglementaires et la hausse des prix de l'électricité.</div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">⚡</div>
+      <span class="kpi-num" data-target="25.3" data-suffix=" GW">0</span>
+      <div class="kpi-label">Puissance installée fin 2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🏭</div>
+      <span class="kpi-num" data-target="24.5" data-suffix=" TWh">0</span>
+      <div class="kpi-label">Production électrique 2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📊</div>
+      <span class="kpi-num" data-target="5.2" data-suffix="%">0</span>
+      <div class="kpi-label">Part de l'électricité française</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🎯</div>
+      <span class="kpi-num" data-target="100" data-suffix=" GW">0</span>
+      <div class="kpi-label">Objectif national 2035</div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h3>Évolution de la puissance installée (GW)</h3>
+      <div style="position:relative;height:220px;"><canvas id="chartGrowth" role="img" aria-label="Évolution puissance photovoltaïque 2018-2024">Données: 2018: 8.5GW, 2019: 9.4GW, 2020: 10.6GW, 2021: 12.1GW, 2022: 15.2GW, 2023: 17.2GW, 2024: 25.3GW</canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>Mix énergétique France 2024</h3>
+      <div style="position:relative;height:220px;"><canvas id="chartMix" role="img" aria-label="Mix électrique France 2024">Nucléaire 67%, Hydraulique 12%, Solaire 5.2%, Éolien 9%, Autres 6.8%</canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CLIENTS ══ -->
+<section id="clients" style="min-height:auto;padding:4rem 2rem;">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:800px;margin-bottom:2rem;">
+    <div class="section-label">02 — Cibles commerciales</div>
+    <div class="section-title">Nos clients B2B</div>
+    <div class="section-sub" style="margin:0 auto 0.5rem;">Les entreprises représentent 60% de la consommation électrique française. 6 000 déjà équipées, des milliers à convaincre.</div>
+  </div>
+  <div class="clients-grid">
+    <div class="client-card">
+      <div class="client-icon">🏪</div>
+      <div class="client-info">
+        <h3>TPE / PME</h3>
+        <p>Commerces, artisans, bureaux — cœur de cible MOULANGE</p>
+      </div>
+    </div>
+    <div class="client-card">
+      <div class="client-icon">🏭</div>
+      <div class="client-info">
+        <h3>Entrepôts & Industrie</h3>
+        <p>Grandes surfaces de toiture, fort potentiel de production</p>
+      </div>
+    </div>
+    <div class="client-card">
+      <div class="client-icon">🌾</div>
+      <div class="client-info">
+        <h3>Exploitations Agricoles</h3>
+        <p>Bâtiments agricoles + agrivoltaïsme en développement</p>
+      </div>
+    </div>
+    <div class="client-card">
+      <div class="client-icon">🏛️</div>
+      <div class="client-info">
+        <h3>Collectivités Locales</h3>
+        <p>Mairies, établissements publics — obligations RSE fortes</p>
+      </div>
+    </div>
+  </div>
+  <div class="conso-bar fade-in" style="margin-top:2rem;">
+    <div class="conso-bar-label">
+      <span>Part des entreprises dans la consommation électrique française</span>
+      <span style="color:#4CAF50;font-weight:700;">60%</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" id="consoBar" style="background:linear-gradient(90deg,#4CAF50,#81C784);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RÉGLEMENTAIRE ══ -->
+<section id="reglementaire" style="min-height:auto;padding:4rem 2rem;">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:900px;margin-bottom:2rem;">
+    <div class="section-label">03 — Réglementation</div>
+    <div class="section-title">Aides & obligations : notre levier</div>
+  </div>
+  <div class="rgl-grid">
+    <div class="rgl-card">
+      <div class="tag">Prime</div>
+      <h3>Prime autoconsommation</h3>
+      <p>Pour installations ≤ 100 kWc — versée par EDF OA à l'installation</p>
+      <div class="benefit">Jusqu'à ~10 000 €</div>
+    </div>
+    <div class="rgl-card">
+      <div class="tag">Revenu</div>
+      <h3>Obligation d'achat EDF OA</h3>
+      <p>Revente du surplus d'énergie à EDF à tarif garanti sur 20 ans</p>
+      <div class="benefit">Revenu récurrent garanti</div>
+    </div>
+    <div class="rgl-card">
+      <div class="tag">Fiscalité</div>
+      <h3>Récupération TVA</h3>
+      <p>La TVA sur le matériel est récupérable pour les professionnels</p>
+      <div class="benefit">20% du coût matériel</div>
+    </div>
+    <div class="rgl-card">
+      <div class="tag">Loi APER</div>
+      <h3>Ombrières obligatoires</h3>
+      <p>Parkings > 1 500 m² : installation solaire obligatoire — opportunité marché immédiate</p>
+      <div class="benefit">Marché captif massif</div>
+    </div>
+    <div class="rgl-card">
+      <div class="tag">Décret tertiaire</div>
+      <h3>Réduction consommation</h3>
+      <p>Bâtiments tertiaires > 1 000 m² : obligation de réduire la consommation de -40% en 2030</p>
+      <div class="benefit">Levier commercial fort</div>
+    </div>
+    <div class="rgl-card">
+      <div class="tag">RSE</div>
+      <h3>Exigences RSE renforcées</h3>
+      <p>Les entreprises cherchent à améliorer leur bilan carbone — solaire = argument RSE immédiat</p>
+      <div class="benefit">Différenciateur fort</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ OBJECTIFS SMART ══ -->
+<section id="smart">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:900px;">
+    <div class="section-label">04 — Vision stratégique</div>
+    <div class="section-title">Objectifs SMART sur 12–18 mois</div>
+    <div class="section-sub" style="margin:0 auto 2.5rem;">Des objectifs mesurables, réalistes et ancrés dans la réalité du marché.</div>
+  </div>
+  <div class="smart-grid">
+    <div class="smart-card green">
+      <div class="smart-big green" data-target="20" data-suffix=" install.">0</div>
+      <div class="smart-title">Installations B2B réalisées</div>
+      <div class="smart-desc">PME locales en autoconsommation. Confirmé par la demande : 6 000 entreprises équipées en 2023, marché en forte croissance.</div>
+    </div>
+    <div class="smart-card gold">
+      <div class="smart-big gold" data-target="400" data-suffix=" K€">0</div>
+      <div class="smart-title">Chiffre d'affaires HT an 1</div>
+      <div class="smart-desc">Soit 15 à 20 projets à 20–25 K€ HT en moyenne. Cohérent avec les prix du marché et la demande actuelle.</div>
+    </div>
+    <div class="smart-card blue">
+      <div class="smart-big blue" data-target="90" data-suffix="%">0</div>
+      <div class="smart-title">Taux de satisfaction client</div>
+      <div class="smart-desc">Mesuré par enquête post-installation. La proximité d'une petite structure est un levier différenciant face aux grands groupes.</div>
+    </div>
+    <div class="smart-card teal">
+      <div class="smart-big teal" data-target="300" data-suffix=" kWc">0</div>
+      <div class="smart-title">Puissance cumulée installée</div>
+      <div class="smart-desc">20 installations × 15 kWc = 300 kWc. Contribution concrète aux objectifs nationaux de réduction des émissions CO2.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RISQUES ══ -->
+<section id="risques">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:900px;">
+    <div class="section-label">05 — Gestion des risques</div>
+    <div class="section-title">Matrice de criticité</div>
+    <div class="section-sub" style="margin:0 auto 1.5rem;">Chaque risque est anticipé avec un plan de mitigation concret.</div>
+    <div class="risk-legend" style="justify-content:center;margin-bottom:2rem;">
+      <div class="risk-legend-item"><div class="risk-dot red"></div>Critique</div>
+      <div class="risk-legend-item"><div class="risk-dot orange"></div>Modéré</div>
+      <div class="risk-legend-item"><div class="risk-dot yellow"></div>Faible</div>
+      <div class="risk-legend-item"><div class="risk-dot green"></div>Résiduel</div>
+    </div>
+  </div>
+  <div class="risk-grid">
+    <div class="risk-item">
+      <div class="risk-dot red"></div>
+      <div class="risk-text"><h4>Accident chantier / sinistre</h4><p>→ RC Pro + assurance décennale obligatoires + formation sécurité hauteur</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot red"></div>
+      <div class="risk-text"><h4>Manque de trésorerie au démarrage</h4><p>→ Apport 40 K€ + prêt BPI 60 K€ + aides régionales 15 K€</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot red"></div>
+      <div class="risk-text"><h4>Difficulté de recrutement</h4><p>→ Partenariats CFA, formations internes, apprentissage</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot orange"></div>
+      <div class="risk-text"><h4>Retard approvisionnement panneaux</h4><p>→ 2 fournisseurs référencés + stock tampon</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot orange"></div>
+      <div class="risk-text"><h4>Baisse des aides d'État</h4><p>→ Veille réglementaire continue, diversification de l'offre</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot orange"></div>
+      <div class="risk-text"><h4>Concurrence prix agressive</h4><p>→ Différenciation service & proximité locale, fidélisation</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot yellow"></div>
+      <div class="risk-text"><h4>Défaillance client / impayé</h4><p>→ Acompte 30% à la commande + assurance-crédit souscrite</p></div>
+    </div>
+    <div class="risk-item">
+      <div class="risk-dot green"></div>
+      <div class="risk-text"><h4>Mauvaises conditions météo</h4><p>→ Planning avec marges de sécurité par trimestre</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ RESSOURCES ══ -->
+<section id="ressources">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:900px;">
+    <div class="section-label">06 — Ressources</div>
+    <div class="section-title">Humaines · Financières · Matérielles</div>
+  </div>
+  <div class="res-tabs fade-in">
+    <button class="res-tab active" onclick="showTab('humain')">👥 Humaines</button>
+    <button class="res-tab" onclick="showTab('fin')">💶 Financières</button>
+    <button class="res-tab" onclick="showTab('mat')">🔧 Matérielles</button>
+  </div>
+  <div id="panel-humain" class="res-panel active">
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="avatar g1">GM</div>
+        <div class="team-info">
+          <h4>Guillo MOUASSAMI</h4>
+          <p>Co-dirigeant · Commercial & Gestion</p>
+          <p style="margin-top:0.4rem;font-size:0.8rem;color:rgba(255,255,255,0.35);">Ingénieur ISTY — Associé gérant</p>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="avatar g2">GL</div>
+        <div class="team-info">
+          <h4>Gabrielle LANGERON</h4>
+          <p>Co-dirigeante · Technique & Qualité</p>
+          <p style="margin-top:0.4rem;font-size:0.8rem;color:rgba(255,255,255,0.35);">Ingénieure ISTY — Associée gérante</p>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="avatar g3">T1</div>
+        <div class="team-info">
+          <h4>Technicien installateur N°1</h4>
+          <p>CAP/BP électricien + CACES — CDI an 1</p>
+          <div class="salary">32 000 – 38 000 €/an</div>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="avatar g3">T2</div>
+        <div class="team-info">
+          <h4>Technicien installateur N°2</h4>
+          <p>Expérience 2+ ans solaire — CDI an 2</p>
+          <div class="salary">35 000 – 40 000 €/an</div>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="avatar" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);">AP</div>
+        <div class="team-info">
+          <h4>Apprenti BTS EERV</h4>
+          <p>Formation en alternance</p>
+          <div class="salary">6 000 – 8 000 €/an</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;padding:1rem;background:rgba(76,175,80,0.08);border-radius:12px;border:1px solid rgba(76,175,80,0.2);">
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:1px;">Certifications requises</div>
+      <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+        <span style="background:rgba(76,175,80,0.15);color:#4CAF50;font-size:0.78rem;padding:4px 12px;border-radius:10px;border:1px solid rgba(76,175,80,0.3);">⚡ Habilitation B1V, B2V, BR</span>
+        <span style="background:rgba(76,175,80,0.15);color:#4CAF50;font-size:0.78rem;padding:4px 12px;border-radius:10px;border:1px solid rgba(76,175,80,0.3);">📜 QualiPV RGE</span>
+        <span style="background:rgba(76,175,80,0.15);color:#4CAF50;font-size:0.78rem;padding:4px 12px;border-radius:10px;border:1px solid rgba(76,175,80,0.3);">🦺 Travail en hauteur</span>
+        <span style="background:rgba(76,175,80,0.15);color:#4CAF50;font-size:0.78rem;padding:4px 12px;border-radius:10px;border:1px solid rgba(76,175,80,0.3);">🚗 CACES nacelle</span>
+      </div>
+    </div>
+  </div>
+  <div id="panel-fin" class="res-panel">
+    <div class="fin-cards">
+      <div class="fin-card">
+        <div class="num g">40 K€</div>
+        <p>Apport fondateurs</p>
+      </div>
+      <div class="fin-card">
+        <div class="num b">60 K€</div>
+        <p>Prêt bancaire / BPI</p>
+      </div>
+      <div class="fin-card">
+        <div class="num o">15 K€</div>
+        <p>Aides régionales / ADEME</p>
+      </div>
+    </div>
+    <div style="position:relative;height:260px;margin-bottom:1.5rem;">
+      <canvas id="chartPrev" role="img" aria-label="Prévisionnel an 1 : 3 scénarios CA vs résultat">Hypothèse basse: CA 200K€, résultat 25K€. Cible: CA 400K€, résultat 125K€. Haute: CA 500K€, résultat 150K€</canvas>
+    </div>
+    <div style="padding:1rem;background:rgba(76,175,80,0.08);border-radius:12px;border:1px solid rgba(76,175,80,0.2);text-align:center;">
+      <div style="font-size:0.85rem;color:rgba(255,255,255,0.5);">Seuil de rentabilité</div>
+      <div style="font-size:1.5rem;font-weight:700;color:#4CAF50;margin:0.3rem 0;">12 à 15 installations · ~250 000 € CA</div>
+    </div>
+  </div>
+  <div id="panel-mat" class="res-panel">
+    <div class="mat-cols">
+      <div>
+        <h3>Équipements chantier</h3>
+        <div class="mat-item"><span class="icon">🚛</span>Camion utilitaire (1 puis 2)</div>
+        <div class="mat-item"><span class="icon">🏗️</span>Échafaudages & nacelle</div>
+        <div class="mat-item"><span class="icon">🔌</span>Outillage électrique pro</div>
+        <div class="mat-item"><span class="icon">🦺</span>EPI complets par technicien</div>
+        <div class="mat-item"><span class="icon">📦</span>Stock câbles, onduleurs, connecteurs</div>
+      </div>
+      <div>
+        <h3>Bureau & Logiciels</h3>
+        <div class="mat-item"><span class="icon">💻</span>PVSyst (dimensionnement solaire)</div>
+        <div class="mat-item"><span class="icon">📊</span>ERP/CRM gestion clients & projets</div>
+        <div class="mat-item"><span class="icon">🚗</span>Véhicule commercial prospection</div>
+        <div class="mat-item"><span class="icon">🏭</span>Atelier/stock loué (~500€/mois)</div>
+        <div style="margin-top:1rem;">
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;">Fournisseurs référencés</div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+            <span style="font-size:0.75rem;background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:8px;color:rgba(255,255,255,0.5);">BYD</span>
+            <span style="font-size:0.75rem;background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:8px;color:rgba(255,255,255,0.5);">Jinko Solar</span>
+            <span style="font-size:0.75rem;background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:8px;color:rgba(255,255,255,0.5);">SMA</span>
+            <span style="font-size:0.75rem;background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:8px;color:rgba(255,255,255,0.5);">Fronius</span>
+            <span style="font-size:0.75rem;background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:8px;color:rgba(255,255,255,0.5);">Legrand</span>
+            <span style="font-size:0.75rem;background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:8px;color:rgba(255,255,255,0.5);">K2 Systems</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PLANNING ══ -->
+<section id="planning">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:950px;">
+    <div class="section-label">07 — Feuille de route</div>
+    <div class="section-title">Planning Gantt — 18 mois</div>
+    <div class="section-sub" style="margin:0 auto 2.5rem;">De la création de l'entreprise aux 20 installations.</div>
+  </div>
+  <div class="gantt fade-in">
+    <table class="gantt-table">
+      <thead>
+        <tr>
+          <th class="activity">Activité / Phase</th>
+          <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th>
+          <th>Budget HT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="activity">🏗️ Création & certifications</td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td class="budget-num">5 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">📋 Prospection B2B & clients</td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td class="budget-num">3 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">☀️ Installations lot 1 (5 projets)</td>
+          <td><div class="gantt-cell"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td class="budget-num">60 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">📣 Communication & notoriété</td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td class="budget-num">4 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">☀️ Installations lot 2 (5 projets)</td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td class="budget-num">65 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">📊 Bilan intermédiaire</td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td class="budget-num">—</td>
+        </tr>
+        <tr>
+          <td class="activity">☀️ Installations lot 3 (10 projets)</td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td class="budget-num">130 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">🤝 Partenariats locaux</td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td class="budget-num">2 000 €</td>
+        </tr>
+        <tr>
+          <td class="activity">📈 Évaluation & bilan annuel</td>
+          <td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td><td><div class="gantt-cell"></div></td>
+          <td><div class="gantt-cell active"></div></td>
+          <td class="budget-num">1 500 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══ CHIFFRAGE ══ -->
+<section id="chiffrage" style="min-height:auto;padding:4rem 2rem;">
+  <div class="fade-in" style="text-align:center;width:100%;max-width:950px;margin-bottom:2.5rem;">
+    <div class="section-label">08 — Budget</div>
+    <div class="section-title">Chiffrage & investissement initial</div>
+  </div>
+  <div class="budget-grid fade-in">
+    <ul class="budget-list">
+      <li><span>Création société & frais juridiques</span><span>3 000 €</span></li>
+      <li><span>Certifications QualiPV & formations</span><span>5 000 €</span></li>
+      <li><span>Matériel & véhicules</span><span>35 000 €</span></li>
+      <li><span>Stock initial (3 premières instal.)</span><span>25 000 €</span></li>
+      <li><span>Communication & marketing</span><span>4 000 €</span></li>
+      <li><span>Logiciels & licences</span><span>3 000 €</span></li>
+      <li><span>Loyer atelier/stock (12 mois)</span><span>6 000 €</span></li>
+      <li><span>Assurances RC Pro + décennale</span><span>8 000 €</span></li>
+      <li><span>Salaires chargés (T2 à T4)</span><span>50 000 €</span></li>
+      <li><span>Trésorerie de sécurité</span><span>15 000 €</span></li>
+      <li><span>TOTAL INVESTISSEMENT</span><span>154 000 €</span></li>
+    </ul>
+    <div>
+      <div style="position:relative;height:280px;margin-bottom:1rem;">
+        <canvas id="chartBudget" role="img" aria-label="Répartition du budget initial MOULANGE">Salaires 32%, Matériel 23%, Stock 16%, Trésorerie 10%, Assurances 5%, Atelier 4%, Communication 3%, Logiciels 2%, Certifications 3%, Création 2%</canvas>
+      </div>
+      <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);text-align:center;">Répartition du budget initial (154 000 € HT)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONCLUSION ══ -->
+<section id="conclusion">
+  <div class="hero-badge fade-in">MOULANGE — ISTY Paris-Saclay · 2025</div>
+  <div class="conclusion-title fade-in">Prête pour l'avenir</div>
+  <div class="pillars fade-in">
+    <div class="pillar">
+      <div class="pillar-icon">📈</div>
+      <h3>Marché porteur</h3>
+      <p>+47%/an · obligations légales · hausse prix énergie · 6 000 entreprises déjà équipées</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">🎯</div>
+      <h3>Stratégie claire</h3>
+      <p>20 installations · 400 K€ CA · positionnement qualité et service de proximité</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">🛡️</div>
+      <h3>Risques maîtrisés</h3>
+      <p>Matrice complète · assurances adaptées · financement diversifié sur 3 sources</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">🌿</div>
+      <h3>Impact RSE fort</h3>
+      <p>300 kWc installés · contribution concrète à la transition énergétique française</p>
+    </div>
+  </div>
+  <div class="tagline fade-in">
+    <em>MOULANGE</em> — L'énergie solaire, au service de votre entreprise.
+  </div>
+</section>
+
+<script>
+const CHART_GREEN = '#4CAF50';
+const CHART_GOLD = '#F9A825';
+const CHART_BLUE = '#42A5F5';
+const CHART_GRAY = 'rgba(255,255,255,0.1)';
+const LABEL_COLOR = 'rgba(255,255,255,0.5)';
+const GRID_COLOR = 'rgba(255,255,255,0.07)';
+
+function animateCounter(el, target, suffix, duration) {
+  let start = null;
+  const isFloat = target % 1 !== 0;
+  function step(ts) {
+    if (!start) start = ts;
+    const progress = Math.min((ts - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = isFloat ? (ease * target).toFixed(1) : Math.round(ease * target);
+    el.textContent = val + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      el.classList.add('visible');
+      if (el.dataset.target) {
+        animateCounter(el, parseFloat(el.dataset.target), el.dataset.suffix || '', 1800);
+      }
+      if (el.id === 'consoBar') {
+        setTimeout(() => { el.style.width = '60%'; }, 200);
+      }
+      observer.unobserve(el);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('.kpi-card, .client-card, .smart-card, .risk-item, .rgl-card, .fade-in, #consoBar').forEach(el => observer.observe(el));
+document.querySelectorAll('[data-target]').forEach(el => observer.observe(el));
+
+setTimeout(() => {
+  new Chart(document.getElementById('chartGrowth'), {
+    type: 'line',
+    data: {
+      labels: ['2018','2019','2020','2021','2022','2023','2024'],
+      datasets: [{
+        label: 'GW installés',
+        data: [8.5, 9.4, 10.6, 12.1, 15.2, 17.2, 25.3],
+        borderColor: CHART_GREEN,
+        backgroundColor: 'rgba(76,175,80,0.12)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: CHART_GREEN,
+        pointRadius: 4,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: LABEL_COLOR }, grid: { color: GRID_COLOR } },
+        y: { ticks: { color: LABEL_COLOR, callback: v => v + ' GW' }, grid: { color: GRID_COLOR } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartMix'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Nucléaire', 'Éolien', 'Hydraulique', 'Solaire ☀', 'Autres'],
+      datasets: [{
+        data: [67, 9, 12, 5.2, 6.8],
+        backgroundColor: ['rgba(255,255,255,0.12)', 'rgba(66,165,245,0.6)', 'rgba(77,182,172,0.6)', CHART_GREEN, 'rgba(255,255,255,0.06)'],
+        borderColor: ['rgba(255,255,255,0.08)', 'rgba(66,165,245,0.3)', 'rgba(77,182,172,0.3)', 'rgba(76,175,80,0.5)', 'rgba(255,255,255,0.04)'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '%' } }
+      }
+    }
+  });
+
+  const legendMix = [
+    { label: 'Nucléaire 67%', color: 'rgba(255,255,255,0.3)' },
+    { label: 'Hydraulique 12%', color: 'rgba(77,182,172,0.6)' },
+    { label: 'Éolien 9%', color: 'rgba(66,165,245,0.6)' },
+    { label: 'Solaire 5.2%', color: '#4CAF50' },
+    { label: 'Autres 6.8%', color: 'rgba(255,255,255,0.15)' },
+  ];
+  const lDiv = document.createElement('div');
+  lDiv.style = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;';
+  legendMix.forEach(l => {
+    lDiv.innerHTML += `<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(255,255,255,0.5)"><span style="width:10px;height:10px;border-radius:2px;background:${l.color};display:inline-block;"></span>${l.label}</span>`;
+  });
+  document.getElementById('chartMix').parentNode.parentNode.appendChild(lDiv);
+}, 100);
+
+function buildFinChart() {
+  const ctx = document.getElementById('chartPrev');
+  if (!ctx || ctx._chartBuilt) return;
+  ctx._chartBuilt = true;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Hypothèse basse', 'Cible', 'Hypothèse haute'],
+      datasets: [
+        { label: 'CA HT (K€)', data: [200, 400, 500], backgroundColor: 'rgba(76,175,80,0.5)', borderColor: CHART_GREEN, borderWidth: 1.5 },
+        { label: 'Résultat net (K€)', data: [25, 125, 150], backgroundColor: 'rgba(249,168,37,0.5)', borderColor: CHART_GOLD, borderWidth: 1.5 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: { ticks: { color: LABEL_COLOR }, grid: { color: GRID_COLOR } },
+        y: { ticks: { color: LABEL_COLOR, callback: v => v + ' K€' }, grid: { color: GRID_COLOR } }
+      }
+    }
+  });
+  const lDiv2 = document.createElement('div');
+  lDiv2.style = 'display:flex;gap:16px;margin-top:8px;font-size:12px;';
+  lDiv2.innerHTML = `<span style="display:flex;align-items:center;gap:4px;color:rgba(255,255,255,0.5)"><span style="width:10px;height:10px;background:rgba(76,175,80,0.5);border-radius:2px;display:inline-block;"></span>CA HT</span><span style="display:flex;align-items:center;gap:4px;color:rgba(255,255,255,0.5)"><span style="width:10px;height:10px;background:rgba(249,168,37,0.5);border-radius:2px;display:inline-block;"></span>Résultat net</span>`;
+  ctx.parentNode.parentNode.appendChild(lDiv2);
+}
+
+new Chart(document.getElementById('chartBudget'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Salaires','Matériel','Stock','Trésorerie','Assurances','Atelier','Communication','Logiciels','Certifications','Création'],
+    datasets: [{
+      data: [50, 35, 25, 15, 8, 6, 4, 3, 5, 3],
+      backgroundColor: [
+        'rgba(76,175,80,0.7)','rgba(76,175,80,0.5)','rgba(76,175,80,0.4)','rgba(249,168,37,0.6)',
+        'rgba(249,168,37,0.4)','rgba(66,165,245,0.5)','rgba(66,165,245,0.35)','rgba(77,182,172,0.5)',
+        'rgba(77,182,172,0.35)','rgba(255,255,255,0.15)'
+      ],
+      borderColor: 'rgba(255,255,255,0.05)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + ' K€' } }
+    }
+  }
+});
+
+function showTab(name) {
+  document.querySelectorAll('.res-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.res-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'fin') setTimeout(buildFinChart, 50);
+}
+
+const tabObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { buildFinChart(); tabObs.disconnect(); }});
+}, { threshold: 0.1 });
+const finPanel = document.getElementById('panel-fin');
+if (finPanel) tabObs.observe(finPanel);
+</script>
+</body>
+</html>
